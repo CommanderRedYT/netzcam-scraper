@@ -11,7 +11,7 @@
   },
   "author": "CommanderRedYT <ccommanderred@gmail.com>",
   "license": "MIT",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
