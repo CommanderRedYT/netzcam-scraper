@@ -1,5 +1,5 @@
 {
-  "name": "netzcam-scraper",
+  "name": "netzcam-scraper-cli",
   "main": "index.js",
   "bin": {
     "netzcam-scraper": "index.js"
