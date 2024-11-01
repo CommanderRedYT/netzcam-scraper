@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import { ArgumentParser } from 'argparse';
 import path from 'path';
 import fs from 'fs';
