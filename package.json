@@ -1,15 +1,25 @@
 {
+  "name": "netzcam-scraper",
   "main": "index.js",
+  "bin": {
+    "netzcam-scraper": "index.js"
+  },
   "type": "module",
-  "private": "true",
+  "repository": {
+    "type": "git",
+    "url": "git+github.com:CommanderRedYT/netzcam-scraper.git"
+  },
+  "author": "CommanderRedYT <ccommanderred@gmail.com>",
   "license": "MIT",
+  "version": "1.0.1",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node index.js",
     "dev": "nodemon index.js"
   },
   "dependencies": {
-    "argparse": "^2.0.1"
+    "argparse": "^2.0.1",
+    "commander": "^12.1.0"
   },
   "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e",
   "devDependencies": {

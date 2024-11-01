@@ -124,7 +124,7 @@ const handleSave = async () => {
     }));
 }
 
-const main = async () => {
+const index = async () => {
     const text = await fetchText(projectArg);
 
     if (!text || text.length === 0 || text.some(t => !t)) {
@@ -140,4 +140,4 @@ const main = async () => {
     }
 }
 
-main();
+index();
