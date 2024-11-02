@@ -92,6 +92,7 @@ const fetchText = async (project) => {
             }
 
             if (response.status !== 200) {
+                console.warn('[fetchText] Invalid status code', response.status);
                 return null;
             }
 
@@ -114,6 +115,7 @@ const fetchImage = async (project, name) => {
         }
 
         if (response.status !== 200) {
+            console.warn('[fetchImage] Invalid status code', response.status);
             return null;
         }
 
