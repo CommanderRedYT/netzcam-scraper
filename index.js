@@ -14,6 +14,7 @@ parser.add_argument('-n', '--name', { help: 'Name of the camera(s)', required: t
 parser.add_argument('-o', '--output-dir', { help: 'Output directory', required: true, type: 'str' });
 parser.add_argument('-m', '--mkdir', { help: 'Create output directory if it does not exist', action: 'store_true' });
 parser.add_argument('-i', '--interval', { help: 'Interval in seconds', type: 'int', default: 10 });
+parser.add_argument('-l', '--log-level', { help: 'Log level', type: 'str', default: 'info' });
 
 const args = parser.parse_args();
 
@@ -22,6 +23,43 @@ const namesArg = args.name;
 const outputDirArg = args.output_dir;
 const mkdirArg = args.mkdir;
 const intervalArg = args.interval;
+const logLevelArg = args.log_level;
+
+const validLogLevels = ['debug', 'info', 'warn', 'error'];
+if (!validLogLevels.includes(logLevelArg)) {
+    console.error('Invalid log level');
+    process.exit(1);
+}
+const logLevelIndex = validLogLevels.indexOf(logLevelArg);
+
+// Set log level
+const originalConsoleLog = console.log;
+console.log = (...args) => {
+    if (validLogLevels.indexOf('info') >= logLevelIndex) {
+        originalConsoleLog(...args);
+    }
+};
+
+const originalConsoleDebug = console.debug;
+console.debug = (...args) => {
+    if (validLogLevels.indexOf('debug') >= logLevelIndex) {
+        originalConsoleDebug(...args);
+    }
+};
+
+const originalConsoleWarn = console.warn;
+console.warn = (...args) => {
+    if (validLogLevels.indexOf('warn') >= logLevelIndex) {
+        originalConsoleWarn(...args);
+    }
+};
+
+const originalConsoleError = console.error;
+console.error = (...args) => {
+    if (validLogLevels.indexOf('error') >= logLevelIndex) {
+        originalConsoleError(...args);
+    }
+}
 
 let lastTime = [];
 let lastTimeTimestamp = [];
@@ -86,16 +124,17 @@ const fetchImage = async (project, name) => {
 }
 
 const handleSave = async () => {
+    console.debug('Saving images', new Date());
     const texts = await fetchText(projectArg);
 
     const func = async (project, text, name, index) => {
         if (!text) {
-            console.log('No text', new Date());
+            console.warn('No text', new Date());
             return;
         }
 
         if (lastTime[index] && text === lastTime[index]) {
-            console.log('No new image', new Date());
+            console.debug('No new image', new Date());
             return;
         }
 
@@ -104,7 +143,7 @@ const handleSave = async () => {
         if (lastTimeTimestamp[index]) {
             // format time difference as HH:mm:ss
             const diff = moment.duration(moment().diff(lastTimeTimestamp[index]));
-            diffStr = `${diff.hours().toString().padStart(2, '0')}:${diff.minutes().toString().padStart(2, '0')}:${diff.seconds().toString().padStart(2, '0')}`;
+            diffStr = `Time since last image: ${diff.hours().toString().padStart(2, '0')}:${diff.minutes().toString().padStart(2, '0')}:${diff.seconds().toString().padStart(2, '0')}`;
         }
 
         lastTime[index] = text;
@@ -113,7 +152,7 @@ const handleSave = async () => {
         const imageBuffer = await fetchImage(project, name);
 
         if (!imageBuffer) {
-            console.log('No image', new Date());
+            console.warn('No image', new Date());
             return;
         }
 
