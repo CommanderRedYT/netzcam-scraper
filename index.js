@@ -2,6 +2,7 @@
 import { ArgumentParser } from 'argparse';
 import path from 'path';
 import fs from 'fs';
+import moment from 'moment';
 
 const parser = new ArgumentParser({
     description: 'Netzcam Scraper'
@@ -12,6 +13,7 @@ parser.add_argument('-p', '--project', { help: 'Project name', required: true, t
 parser.add_argument('-n', '--name', { help: 'Name of the camera(s)', required: true, nargs: '+' });
 parser.add_argument('-o', '--output-dir', { help: 'Output directory', required: true, type: 'str' });
 parser.add_argument('-m', '--mkdir', { help: 'Create output directory if it does not exist', action: 'store_true' });
+parser.add_argument('-i', '--interval', { help: 'Interval in seconds', type: 'int', default: 10 });
 
 const args = parser.parse_args();
 
@@ -19,8 +21,10 @@ const projectArg = args.project;
 const namesArg = args.name;
 const outputDirArg = args.output_dir;
 const mkdirArg = args.mkdir;
+const intervalArg = args.interval;
 
 let lastTime = [];
+let lastTimeTimestamp = [];
 
 const getUrls = (project, name) => {
     const url = `https://${project}.netzcam.net/out/${name}`;
@@ -95,7 +99,16 @@ const handleSave = async () => {
             return;
         }
 
+        // print time difference
+        let diffStr = undefined;
+        if (lastTimeTimestamp[index]) {
+            // format time difference as HH:mm:ss
+            const diff = moment.duration(moment().diff(lastTimeTimestamp[index]));
+            diffStr = `${diff.hours().toString().padStart(2, '0')}:${diff.minutes().toString().padStart(2, '0')}:${diff.seconds().toString().padStart(2, '0')}`;
+        }
+
         lastTime[index] = text;
+        lastTimeTimestamp[index] = new Date();
 
         const imageBuffer = await fetchImage(project, name);
 
@@ -117,7 +130,7 @@ const handleSave = async () => {
 
         fs.writeFileSync(filePath, Buffer.from(imageBuffer));
 
-        console.log(`Saved ${filePath}`);
+        console.log(`Saved ${filePath}`, diffStr ?? '');
     };
 
     await Promise.all(namesArg.map((name, i) => {
@@ -125,7 +138,7 @@ const handleSave = async () => {
     }));
 }
 
-const index = async () => {
+const main = async () => {
     const text = await fetchText(projectArg);
 
     if (!text || text.length === 0 || text.some(t => !t)) {
@@ -134,11 +147,12 @@ const index = async () => {
     }
 
     lastTime = Array(text.length).fill(null);
+    lastTimeTimestamp = Array(text.length).fill(null);
 
     while (true) {
         await handleSave();
-        await new Promise(resolve => setTimeout(resolve, 10000));
+        await new Promise(resolve => setTimeout(resolve, intervalArg * 1000));
     }
 }
 
-index();
+main();
